@@ -76,8 +76,12 @@ details li+li{margin-top:6px}
 #exitHs{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));left:calc(8px + env(safe-area-inset-left,0px));width:40px;height:40px;border-radius:50%;
   background:rgba(0,0,0,.55);color:var(--ash);border:1px solid var(--line);font-size:1.3rem;line-height:1}
 #divider{position:fixed;top:0;bottom:0;left:50%;width:2px;margin-left:-1px;background:rgba(217,164,65,.35);pointer-events:none}
-#turn{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;background:var(--sanctum);
-  font-family:var(--display);font-size:1.6rem;color:var(--ash)}
+#turn{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;text-align:center;
+  padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));padding-block:24px;background:var(--sanctum);color:var(--ash)}
+#turn p{margin:0;font-family:var(--display);font-size:1.6rem;line-height:1.2;max-width:20ch;text-wrap:balance}
+#turn small{color:var(--ash-dim);max-width:32ch}
+.turnActions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:6px}
+.turnActions .secondary{background:transparent}
 #notice{position:fixed;left:50%;transform:translateX(-50%);top:calc(14px + env(safe-area-inset-top,0px));width:min(30rem,calc(100% - 32px));margin:0;
   background:rgba(23,8,7,.92);border:1px solid var(--line);border-radius:6px;padding:10px 14px;font-size:.92rem;color:var(--ash)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -136,7 +140,14 @@ details li+li{margin-top:6px}
   <button id="droneBtn" aria-pressed="false">Om drone</button>
 </div>
 <button id="exitHs" hidden aria-label="Leave headset mode">×</button>
-<div id="turn" hidden>Turn the phone sideways<br>to place it in the headset</div>
+<div id="turn" hidden>
+  <p>Turn the phone sideways to place it in the headset.</p>
+  <small>If the screen doesn't rotate (it won't inside the Claude app), open your hosted copy in Chrome or Safari instead.</small>
+  <div class="turnActions">
+    <button id="turnOff" class="primary">Leave headset mode</button>
+    <button id="turnBack" class="btn secondary">Back to start</button>
+  </div>
+</div>
 <p id="notice" role="status" hidden></p>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -403,6 +414,8 @@ $('#begin').addEventListener('click',()=>{
   motionReq.then(()=>setTimeout(()=>{if(!state.motion&&state.started)
     notice('Head tracking is not reaching this page, so drag to look around. Open the hosted copy in Chrome or Safari for tracking in a headset.');},1500));
 });
+$('#turnOff').addEventListener('click',()=>setHeadset(false));
+$('#turnBack').addEventListener('click',()=>$('#back').click());
 $('#back').addEventListener('click',()=>{state.started=false;setHeadset(false);if(state.video)state.video.pause();
   if(drone)toggleDrone();if(wake){wake.release().catch(()=>{});wake=null;}$('#landing').hidden=false;applyChrome();});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&state.started&&navigator.wakeLock&&!wake)
