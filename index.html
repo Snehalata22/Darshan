@@ -1,0 +1,463 @@
+<title>Ghar Baithe Darshan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Mukta:wght@400;600&display=swap">
+<style>
+/* Layout: a full-bleed lamp-lit sanctum rendered in WebGL; a translucent brass-edged card sits over it before darshan, then a thin control strip. Deliberately one dark look: it is a dim sanctum and a VR screen. */
+:root{
+  --sanctum:#170807;
+  --kumkum:#3a1210;
+  --brass:#d9a441;
+  --marigold:#f2b33d;
+  --ash:#efe2cf;
+  --ash-dim:#bfa98f;
+  --line:rgba(217,164,65,.32);
+  --veil:rgba(23,8,7,.78);
+  --display:"Rozha One","Tiro Devanagari Hindi",Georgia,serif;
+  --body:"Mukta","Noto Sans Devanagari",system-ui,sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{margin:0;background:var(--sanctum);color:var(--ash);font-family:var(--body);font-size:16px;line-height:1.5;overflow:hidden;-webkit-tap-highlight-color:transparent}
+#view{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;background:var(--sanctum)}
+button,label.btn{font:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--marigold);outline-offset:3px}
+
+/* Landing */
+#landing{position:fixed;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  background:radial-gradient(120% 80% at 50% 0%,rgba(23,8,7,.35),rgba(23,8,7,.86) 60%);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:calc(24px + env(safe-area-inset-top,0px)) calc(32px + env(safe-area-inset-bottom,0px));
+  display:flex;justify-content:center;align-items:flex-start}
+.card{width:100%;max-width:34rem;display:flex;flex-direction:column;gap:20px;margin-top:6vh;
+  background:linear-gradient(180deg,rgba(58,18,16,.82),var(--veil));border:1px solid var(--line);border-radius:6px;padding:28px 22px;
+  box-shadow:0 30px 80px rgba(0,0,0,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.eyebrow{margin:0;font-family:var(--display);color:var(--brass);font-size:1.05rem;letter-spacing:.04em}
+h1{margin:0;font-family:var(--display);font-weight:400;font-size:clamp(2.2rem,8vw,3rem);line-height:1.05;color:var(--ash);text-wrap:balance}
+.lede{margin:0;color:var(--ash-dim);max-width:60ch}
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+.primary{background:var(--marigold);color:#2a0f06;border:0;border-radius:999px;padding:12px 24px;font-weight:600;font-size:1.05rem}
+.primary:active{transform:translateY(1px)}
+.btn.secondary{display:inline-flex;align-items:center;border:1px solid var(--brass);color:var(--ash);border-radius:999px;padding:11px 20px}
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0)}
+.loaded{margin:0;font-size:.92rem;color:var(--marigold)}
+.settings{display:flex;flex-direction:column;gap:14px;border-top:1px solid var(--line);padding-top:18px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.row .lbl{display:flex;flex-direction:column;min-width:0}
+.row small{color:var(--ash-dim);font-size:.85rem}
+.switch{position:relative;width:52px;height:30px;flex:none}
+.switch input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.switch span{position:absolute;inset:0;border-radius:999px;background:#4a2a20;border:1px solid var(--line);transition:background .2s}
+.switch span::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--ash-dim);transition:transform .2s,background .2s}
+.switch input:checked+span{background:#7a4a14}
+.switch input:checked+span::after{transform:translateX(22px);background:var(--marigold)}
+.switch input:focus-visible+span{outline:2px solid var(--marigold);outline-offset:3px}
+input[type=range]{width:100%;accent-color:var(--marigold)}
+.spacing{display:flex;flex-direction:column;gap:6px}
+.spacing .top{display:flex;justify-content:space-between;align-items:baseline}
+.num{font-variant-numeric:tabular-nums;color:var(--marigold)}
+details{border-top:1px solid var(--line);padding-top:14px}
+summary{cursor:pointer;font-weight:600;color:var(--ash);list-style:none;display:flex;justify-content:space-between;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--brass);font-family:var(--display);font-size:1.2rem;line-height:1}
+details[open] summary::after{content:"–"}
+details ol,details p{margin:10px 0 0;color:var(--ash-dim);padding-left:1.2rem;max-width:62ch}
+details p{padding-left:0}
+details li+li{margin-top:6px}
+
+/* In-darshan controls */
+#bar{position:fixed;left:0;right:0;bottom:0;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;
+  padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));
+  padding-block:10px calc(10px + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(0deg,rgba(23,8,7,.9),rgba(23,8,7,0))}
+#bar button{background:rgba(58,18,16,.85);color:var(--ash);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:.95rem}
+#bar button[aria-pressed=true]{background:var(--marigold);color:#2a0f06;border-color:var(--marigold)}
+#exitHs{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));left:calc(8px + env(safe-area-inset-left,0px));width:40px;height:40px;border-radius:50%;
+  background:rgba(0,0,0,.55);color:var(--ash);border:1px solid var(--line);font-size:1.3rem;line-height:1}
+#divider{position:fixed;top:0;bottom:0;left:50%;width:2px;margin-left:-1px;background:rgba(217,164,65,.35);pointer-events:none}
+#turn{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;background:var(--sanctum);
+  font-family:var(--display);font-size:1.6rem;color:var(--ash)}
+#notice{position:fixed;left:50%;transform:translateX(-50%);top:calc(14px + env(safe-area-inset-top,0px));width:min(30rem,calc(100% - 32px));margin:0;
+  background:rgba(23,8,7,.92);border:1px solid var(--line);border-radius:6px;padding:10px 14px;font-size:.92rem;color:var(--ash)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<canvas id="view" aria-label="360 degree view of a temple sanctum"></canvas>
+<div id="divider" hidden></div>
+
+<section id="landing">
+  <div class="card">
+    <p class="eyebrow">घर बैठे दर्शन</p>
+    <h1>Ghar Baithe Darshan</h1>
+    <p class="lede">A quiet darshan at home for someone who can't make the journey. Put the phone in a headset, look around the sanctum, and ring the bell just by looking at it.</p>
+    <div class="actions">
+      <button id="begin" class="primary">Begin darshan</button>
+      <label class="btn secondary" for="file">Use my own 360° photo or video</label>
+      <input id="file" class="vh" type="file" accept="image/*,video/*">
+    </div>
+    <p id="loaded" class="loaded" hidden></p>
+
+    <div class="settings">
+      <div class="row">
+        <div class="lbl"><span>Headset mode</span><small>Split screen for Vivitar, BOBOVR and other phone headsets</small></div>
+        <label class="switch"><input id="hs" type="checkbox" aria-label="Headset mode"><span></span></label>
+      </div>
+      <div class="spacing">
+        <div class="top"><label for="sep">Eye spacing</label><span id="sepVal" class="num">45%</span></div>
+        <input id="sep" type="range" min="36" max="50" step="1" value="45">
+        <small style="color:var(--ash-dim)">If you see two of everything in the headset, lower this a step at a time.</small>
+      </div>
+    </div>
+
+    <details>
+      <summary>Setting up the headset</summary>
+      <ol>
+        <li>Turn on headset mode and tap Begin darshan.</li>
+        <li>Turn the phone sideways and slide it in so the thin gold line in the middle sits on the headset's centre divider.</li>
+        <li>Look at the brass bell to the right of the shrine and hold your gaze for a moment to ring it.</li>
+        <li>Look straight down for a moment to turn back toward the shrine.</li>
+        <li>If the headset has a button on top, pressing it rings the bell (or pauses a video).</li>
+      </ol>
+    </details>
+    <details>
+      <summary>Bringing a real temple in</summary>
+      <p>Record from where a devotee would stand, facing the deity, with a 360° camera such as an Insta360 or Ricoh Theta. Export it as an equirectangular JPG or MP4 (twice as wide as it is tall), copy it to the phone, and choose it with the button above. Ask the temple before filming, since many don't allow cameras in the sanctum. Footage from other darshan apps belongs to them, so record your own or get permission.</p>
+    </details>
+  </div>
+</section>
+
+<div id="bar" hidden>
+  <button id="back">← Back</button>
+  <button id="hsBtn" aria-pressed="false">Headset</button>
+  <button id="face">Face shrine</button>
+  <button id="bellBtn">Ring bell</button>
+  <button id="playBtn" hidden>Pause</button>
+  <button id="droneBtn" aria-pressed="false">Om drone</button>
+</div>
+<button id="exitHs" hidden aria-label="Leave headset mode">×</button>
+<div id="turn" hidden>Turn the phone sideways<br>to place it in the headset</div>
+<p id="notice" role="status" hidden></p>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const canvas=$('#view');
+const state={started:false,headset:false,motion:false,mode:'sample',video:null,sep:.45};
+try{const v=parseFloat(localStorage.getItem('darshan-sep'));if(v>=.36&&v<=.5)state.sep=v;
+  state.headset=localStorage.getItem('darshan-hs')==='1';}catch(e){}
+$('#sep').value=Math.round(state.sep*100);$('#sepVal').textContent=Math.round(state.sep*100)+'%';
+$('#hs').checked=state.headset;
+
+/* ---------- renderer & cameras ---------- */
+const renderer=new THREE.WebGLRenderer({canvas,antialias:false});
+renderer.outputEncoding=THREE.sRGBEncoding;
+const scene=new THREE.Scene();
+const head=new THREE.Object3D();head.rotation.order='YXZ';scene.add(head);
+const cam=new THREE.PerspectiveCamera(75,1,.1,1000);head.add(cam);
+const camL=new THREE.PerspectiveCamera(88,1,.1,1000);camL.position.x=-.032;head.add(camL);
+const camR=new THREE.PerspectiveCamera(88,1,.1,1000);camR.position.x=.032;head.add(camR);
+
+/* ---------- the 360 sphere ---------- */
+const W=4096,H=2048,CX=2048;
+const geo=new THREE.SphereGeometry(500,64,32);geo.scale(-1,1,1);
+const sphereMat=new THREE.MeshBasicMaterial({color:0xffffff});
+const sphere=new THREE.Mesh(geo,sphereMat);sphere.rotation.y=-Math.PI/2;scene.add(sphere);
+
+function dirFromPx(x,y,d){const lon=(x/W-.5)*Math.PI*2,lat=(.5-y/H)*Math.PI;
+  return new THREE.Vector3(Math.sin(lon)*Math.cos(lat)*d,Math.sin(lat)*d,-Math.cos(lon)*Math.cos(lat)*d);}
+
+const sanctumCanvas=document.createElement('canvas');sanctumCanvas.width=W;sanctumCanvas.height=H;
+function paintSanctum(){
+  const g=sanctumCanvas.getContext('2d');
+  g.globalCompositeOperation='source-over';g.shadowBlur=0;
+  let gr=g.createLinearGradient(0,0,0,H);
+  gr.addColorStop(0,'#070302');gr.addColorStop(.24,'#24110a');gr.addColorStop(.46,'#5a3720');
+  gr.addColorStop(.62,'#3a2215');gr.addColorStop(.635,'#1c0e09');gr.addColorStop(1,'#060202');
+  g.fillStyle=gr;g.fillRect(0,0,W,H);
+  // stone speckle
+  for(let i=0;i<26000;i++){g.fillStyle=Math.random()<.5?'rgba(0,0,0,.09)':'rgba(255,220,170,.05)';
+    g.fillRect(Math.random()*W,520+Math.random()*780,2+Math.random()*3,2);}
+  // warm light from the shrine
+  let rg=g.createRadialGradient(CX,1000,40,CX,1000,1500);
+  rg.addColorStop(0,'rgba(255,170,80,.32)');rg.addColorStop(1,'rgba(255,170,80,0)');
+  g.globalCompositeOperation='lighter';g.fillStyle=rg;g.fillRect(0,0,W,H);g.globalCompositeOperation='source-over';
+  // lotus frieze
+  g.fillStyle='#3e2414';g.fillRect(0,540,W,64);
+  g.strokeStyle='rgba(230,180,110,.35)';g.lineWidth=3;
+  for(let x=0;x<W;x+=48){g.beginPath();g.arc(x+24,600,20,Math.PI,0);g.stroke();}
+  g.fillStyle='rgba(0,0,0,.5)';g.fillRect(0,604,W,6);
+  // pillars
+  function pillar(x){const w=120,top=620,bot=1300;
+    const pg=g.createLinearGradient(x-w/2,0,x+w/2,0);
+    pg.addColorStop(0,'#2b180e');pg.addColorStop(.45,'#9b7248');pg.addColorStop(.6,'#7a5533');pg.addColorStop(1,'#24140b');
+    g.fillStyle=pg;g.fillRect(x-w/2,top,w,bot-top);g.fillRect(x-w/2-18,top-24,w+36,30);g.fillRect(x-w/2-18,bot-46,w+36,46);
+    for(let y=top+70;y<bot-80;y+=110){g.fillStyle='rgba(20,8,4,.55)';g.fillRect(x-w/2,y,w,6);
+      g.fillStyle='rgba(255,210,150,.18)';g.fillRect(x-w/2,y+6,w,3);
+      for(let k=-2;k<=2;k++){g.beginPath();g.arc(x+k*22,y+34,7,0,7);g.fillStyle='rgba(20,8,4,.35)';g.fill();}}}
+  for(let i=0;i<8;i++)pillar(i*512+256);
+  // toran of mango leaves and marigolds
+  g.strokeStyle='rgba(60,40,20,.9)';g.lineWidth=3;g.beginPath();g.moveTo(0,640);g.lineTo(W,640);g.stroke();
+  for(let x=10;x<W;x+=34){
+    if((x/34|0)%3===0){g.beginPath();g.arc(x,652,10,0,7);g.fillStyle=(x/34|0)%2?'#f2a516':'#e2621b';g.fill();}
+    else{g.save();g.translate(x,642);g.rotate(.15*Math.sin(x));g.beginPath();g.ellipse(0,22,8,22,0,0,7);g.fillStyle='#3d6a2b';g.fill();g.restore();}}
+  // entrance doorway behind, with daylight
+  function daylight(cx){g.beginPath();g.moveTo(cx-180,1300);g.lineTo(cx-180,860);g.quadraticCurveTo(cx-180,740,cx,730);
+    g.quadraticCurveTo(cx+180,740,cx+180,860);g.lineTo(cx+180,1300);g.closePath();
+    const dg=g.createLinearGradient(0,730,0,1300);dg.addColorStop(0,'#fff3d6');dg.addColorStop(.7,'#e8cf9f');dg.addColorStop(1,'#a9895e');
+    g.fillStyle=dg;g.fill();}
+  daylight(0);daylight(W);
+  // sanctum doorway frame
+  const fg=g.createLinearGradient(CX-280,0,CX+280,0);
+  fg.addColorStop(0,'#5d3c21');fg.addColorStop(.5,'#9a6c3c');fg.addColorStop(1,'#5d3c21');
+  g.fillStyle=fg;g.fillRect(CX-280,650,560,650);
+  g.strokeStyle='rgba(40,18,8,.7)';g.lineWidth=5;
+  for(let k=0;k<3;k++)g.strokeRect(CX-266+k*22,664+k*22,532-k*44,640);
+  for(let x=CX-250;x<=CX+250;x+=40){g.beginPath();g.arc(x,690,9,0,7);g.fillStyle='rgba(40,18,8,.5)';g.fill();}
+  // opening
+  g.save();g.beginPath();g.moveTo(CX-190,1300);g.lineTo(CX-190,830);g.quadraticCurveTo(CX-190,720,CX,712);
+  g.quadraticCurveTo(CX+190,720,CX+190,830);g.lineTo(CX+190,1300);g.closePath();
+  g.fillStyle='#120604';g.fill();g.clip();
+  const hg=g.createRadialGradient(CX,950,0,CX,950,260);
+  hg.addColorStop(0,'rgba(255,175,70,.6)');hg.addColorStop(.5,'rgba(190,80,25,.28)');hg.addColorStop(1,'rgba(0,0,0,0)');
+  g.fillStyle=hg;g.fillRect(CX-260,690,520,620);
+  // prabhavali of small lamps
+  for(let i=0;i<=14;i++){const a=Math.PI+i*Math.PI/14;g.beginPath();g.arc(CX+Math.cos(a)*165,960+Math.sin(a)*165,6,0,7);g.fillStyle='#ffd27a';g.fill();}
+  // Om
+  g.font='210px "Rozha One","Noto Sans Devanagari",serif';g.textAlign='center';g.textBaseline='middle';
+  g.shadowColor='#ffb340';g.shadowBlur=50;
+  const og=g.createLinearGradient(0,860,0,1050);og.addColorStop(0,'#fff0b8');og.addColorStop(1,'#d79a2c');
+  g.fillStyle=og;g.fillText('ॐ',CX,955);g.shadowBlur=0;
+  // pedestal
+  [[300,1150,34],[250,1116,34],[200,1084,32]].forEach(([w,y,h])=>{const pg=g.createLinearGradient(0,y,0,y+h);
+    pg.addColorStop(0,'#c58f3c');pg.addColorStop(1,'#6b4419');g.fillStyle=pg;g.fillRect(CX-w/2,y,w,h);});
+  for(let i=0;i<18;i++){g.beginPath();g.arc(CX-120+i*14,1080,6,0,7);g.fillStyle=i%2?'#f2a516':'#c2271b';g.fill();}
+  g.restore();
+  // garland swag and hanging strands
+  function dots(pts){pts.forEach((p,i)=>{g.beginPath();g.arc(p[0],p[1],11,0,7);g.fillStyle=i%2?'#f2a516':'#e2621b';g.fill();});}
+  const sw=[];for(let i=0;i<=24;i++){const t=i/24;sw.push([CX-200+400*t,780+Math.sin(t*Math.PI)*70]);}dots(sw);
+  [CX-205,CX+205].forEach(x=>{const s=[];for(let y=790;y<1170;y+=21)s.push([x,y]);dots(s);});
+  // lamp ledge and brass diyas
+  g.fillStyle='#4a2c17';g.fillRect(CX-320,1262,640,26);g.fillStyle='rgba(255,200,120,.2)';g.fillRect(CX-320,1262,640,4);
+  diyaX.forEach(x=>{g.beginPath();g.ellipse(x,1254,15,8,0,0,Math.PI);g.fillStyle='#b07a2a';g.fill();
+    g.beginPath();g.ellipse(x,1254,15,3,0,0,7);g.fillStyle='#e4b35a';g.fill();});
+  // polished floor reflection
+  const fr=g.createLinearGradient(0,1300,0,1700);fr.addColorStop(0,'rgba(255,170,80,.22)');fr.addColorStop(1,'rgba(255,170,80,0)');
+  g.fillStyle=fr;g.fillRect(CX-260,1300,520,400);
+  for(let y=1340;y<1900;y+=y*.04){g.fillStyle='rgba(255,220,170,.035)';g.fillRect(0,y,W,2);}
+  // rangoli in front of the shrine
+  g.save();g.translate(CX,1640);g.scale(1.6,1);
+  const cols=['#c2185b','#f2b33d','#efe2cf','#e2621b'];
+  [150,112,76,40].forEach((r,ri)=>{const n=8+ri*4;
+    for(let i=0;i<n;i++){const a=i/n*Math.PI*2;g.save();g.rotate(a);g.beginPath();g.ellipse(0,-r,10,18,0,0,7);
+      g.fillStyle=cols[(ri+i)%4];g.globalAlpha=.85;g.fill();g.restore();}});
+  g.globalAlpha=1;g.beginPath();g.arc(0,0,16,0,7);g.fillStyle='#f2b33d';g.fill();g.restore();
+}
+const diyaX=[-4,-3,-2,-1,1,2,3,4].map(k=>CX+k*66);
+paintSanctum();
+const sanctumTex=new THREE.CanvasTexture(sanctumCanvas);
+sanctumTex.encoding=THREE.sRGBEncoding;sanctumTex.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
+sphereMat.map=sanctumTex;
+if(document.fonts&&document.fonts.load){document.fonts.load('210px "Rozha One"','ॐ').then(()=>{paintSanctum();sanctumTex.needsUpdate=true;}).catch(()=>{});}
+
+/* ---------- sample-scene extras: flames, halo, bell ---------- */
+const sampleGroup=new THREE.Group();scene.add(sampleGroup);
+function glowTex(flame){const c=document.createElement('canvas');c.width=64;c.height=flame?128:64;const g=c.getContext('2d');
+  const cy=flame?84:32,r=g.createRadialGradient(32,cy,1,32,cy,flame?36:32);
+  r.addColorStop(0,'rgba(255,248,215,1)');r.addColorStop(.25,'rgba(255,196,90,.9)');r.addColorStop(.6,'rgba(255,120,30,.3)');r.addColorStop(1,'rgba(255,90,0,0)');
+  g.fillStyle=r;g.fillRect(0,0,64,c.height);
+  if(flame){g.beginPath();g.moveTo(32,28);g.quadraticCurveTo(46,70,32,92);g.quadraticCurveTo(18,70,32,28);g.fillStyle='rgba(255,236,170,.95)';g.fill();}
+  const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;return t;}
+const flameMat=new THREE.SpriteMaterial({map:glowTex(true),blending:THREE.AdditiveBlending,depthWrite:false,transparent:true});
+const flames=diyaX.map(x=>{const s=new THREE.Sprite(flameMat);s.center.set(.5,1-92/128);s.position.copy(dirFromPx(x,1249,20));sampleGroup.add(s);return s;});
+const halo=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex(false),blending:THREE.AdditiveBlending,depthWrite:false,transparent:true,opacity:.3}));
+halo.position.copy(dirFromPx(CX,955,19));halo.scale.set(5,5,1);sampleGroup.add(halo);
+
+const brass=new THREE.MeshStandardMaterial({color:0xc99236,metalness:.55,roughness:.32,side:THREE.DoubleSide});
+const prof=[[0,.62],[.05,.62],[.1,.6],[.16,.52],[.2,.38],[.23,.22],[.27,.1],[.34,.03],[.38,0],[.37,-.02],[.3,0]].map(p=>new THREE.Vector2(p[0],p[1]));
+const bellA=.75,bellCenter=new THREE.Vector3(5*Math.sin(bellA),1.3,-5*Math.cos(bellA));
+const pivot=new THREE.Group();pivot.position.set(bellCenter.x,bellCenter.y+2.7,bellCenter.z);sampleGroup.add(pivot);
+const chain=new THREE.Mesh(new THREE.CylinderGeometry(.014,.014,2.2,6),brass);chain.position.y=-1.1;pivot.add(chain);
+const bell=new THREE.Mesh(new THREE.LatheGeometry(prof,40),brass);bell.scale.setScalar(1.6);bell.position.y=-2.2-.62*1.6;pivot.add(bell);
+const clapper=new THREE.Mesh(new THREE.SphereGeometry(.07,12,8),brass);clapper.position.y=-3.15;pivot.add(clapper);
+sampleGroup.add(new THREE.AmbientLight(0x8a6040,1.0));
+const pl=new THREE.PointLight(0xffc27a,1.6,30);pl.position.set(0,1,0);sampleGroup.add(pl);
+const bellDir=bellCenter.clone().normalize();
+
+/* ---------- gaze reticle (headset only) ---------- */
+const ret=new THREE.Group();ret.position.z=-2;head.add(ret);
+const ringMesh=new THREE.Mesh(new THREE.RingGeometry(.026,.036,32),new THREE.MeshBasicMaterial({color:0xf2b33d,transparent:true,opacity:.85,depthTest:false}));
+const fillMesh=new THREE.Mesh(new THREE.CircleGeometry(.026,32),new THREE.MeshBasicMaterial({color:0xf2b33d,transparent:true,opacity:.75,depthTest:false}));
+ringMesh.renderOrder=fillMesh.renderOrder=10;ret.add(ringMesh,fillMesh);ret.visible=false;
+
+/* ---------- orientation ---------- */
+const Y=new THREE.Vector3(0,1,0),Z=new THREE.Vector3(0,0,1),eul=new THREE.Euler(),q0=new THREE.Quaternion(),
+  q1=new THREE.Quaternion(-Math.sqrt(.5),0,0,Math.sqrt(.5)),devQ=new THREE.Quaternion(),yawQ=new THREE.Quaternion();
+let ori=null,yawOffset=0,lon=0,lat=.04,needRecenter=false;
+const screenAngle=()=>(screen.orientation&&typeof screen.orientation.angle==='number')?screen.orientation.angle:(window.orientation||0);
+function deviceQuat(o,t){const d=THREE.MathUtils.degToRad;
+  eul.set(d(o.beta||0),d(o.alpha||0),-d(o.gamma||0),'YXZ');t.setFromEuler(eul);t.multiply(q1);t.multiply(q0.setFromAxisAngle(Z,-d(screenAngle())));}
+function onOri(e){if(e.alpha==null)return;ori=e;if(!state.motion){state.motion=true;needRecenter=true;}}
+function faceShrine(){if(state.motion&&ori){deviceQuat(ori,devQ);const e=new THREE.Euler().setFromQuaternion(devQ,'YXZ');yawOffset=-e.y;}
+  else{lon=0;lat=.04;}buzz();}
+function enableMotion(){
+  if(typeof DeviceOrientationEvent==='undefined')return Promise.resolve(false);
+  const add=()=>{addEventListener('deviceorientation',onOri,true);return true;};
+  if(typeof DeviceOrientationEvent.requestPermission==='function'){
+    return DeviceOrientationEvent.requestPermission().then(r=>r==='granted'?add():false).catch(()=>false);}
+  return Promise.resolve(add());
+}
+
+/* ---------- drag & tap ---------- */
+let drag=null;
+canvas.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,t:performance.now()};canvas.setPointerCapture(e.pointerId);});
+canvas.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;drag.x=e.clientX;drag.y=e.clientY;
+  const k=(cam.fov*Math.PI/180)/Math.max(200,canvas.clientHeight);
+  if(state.motion)yawOffset+=dx*k;else{lon+=dx*k;lat=Math.max(-1.45,Math.min(1.45,lat+dy*k));}});
+canvas.addEventListener('pointerup',e=>{if(!drag)return;const moved=Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy),dt=performance.now()-drag.t;drag=null;
+  if(moved<10&&dt<350&&state.started)onTap(e);});
+const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();
+function onTap(e){
+  if(state.headset){if(state.video)togglePlay();else ringBell();return;}
+  if(!sampleGroup.visible)return;
+  ndc.set(e.clientX/canvas.clientWidth*2-1,-(e.clientY/canvas.clientHeight)*2+1);ray.setFromCamera(ndc,cam);
+  if(ray.intersectObjects([bell,chain,clapper]).length)ringBell();
+}
+
+/* ---------- sound ---------- */
+let ac=null,drone=null,swingStart=-1e9;
+function audio(){if(!ac){const AC=window.AudioContext||window.webkitAudioContext;if(AC)try{ac=new AC();}catch(e){}}
+  if(ac&&ac.state==='suspended')ac.resume();return ac;}
+function buzz(){try{navigator.vibrate&&navigator.vibrate(25);}catch(e){}}
+function ringBell(){
+  swingStart=performance.now();buzz();
+  const a=audio();if(!a)return;const now=a.currentTime,m=a.createGain();m.gain.value=.3;m.connect(a.destination);
+  const base=612;
+  [[1,1,4.5],[1.004,.6,4.5],[2.0,.45,3],[2.76,.4,2.4],[5.4,.22,1.5],[8.93,.1,.9],[.5,.28,5]].forEach(([r,amp,dur])=>{
+    const o=a.createOscillator(),gn=a.createGain();o.frequency.value=base*r;
+    gn.gain.setValueAtTime(0,now);gn.gain.linearRampToValueAtTime(amp,now+.004);gn.gain.exponentialRampToValueAtTime(.0001,now+dur);
+    o.connect(gn);gn.connect(m);o.start(now);o.stop(now+dur+.05);});
+}
+function toggleDrone(){
+  const a=audio();if(!a)return;const btn=$('#droneBtn');
+  if(drone){const d=drone;drone=null;d.g.gain.cancelScheduledValues(a.currentTime);d.g.gain.setTargetAtTime(0,a.currentTime,.6);
+    setTimeout(()=>d.nodes.forEach(n=>{try{n.stop();}catch(e){}}),3000);btn.setAttribute('aria-pressed','false');return;}
+  const g=a.createGain();g.gain.value=0;g.connect(a.destination);
+  const lp=a.createBiquadFilter();lp.type='lowpass';lp.frequency.value=520;lp.connect(g);
+  const nodes=[];[[65.4,'sine',.5],[130.8,'sawtooth',.12],[196.2,'sawtooth',.06],[261.6,'sine',.08]].forEach(([f,t,v])=>{
+    const o=a.createOscillator(),og=a.createGain();o.type=t;o.frequency.value=f;og.gain.value=v;o.connect(og);og.connect(lp);o.start();nodes.push(o);});
+  const lfo=a.createOscillator(),lg=a.createGain();lfo.frequency.value=.12;lg.gain.value=.05;lfo.connect(lg);lg.connect(g.gain);lfo.start();nodes.push(lfo);
+  g.gain.setTargetAtTime(.14,a.currentTime,1.2);drone={g,nodes};btn.setAttribute('aria-pressed','true');
+}
+
+/* ---------- your own media ---------- */
+function setTexture(t){if(sphereMat.map&&sphereMat.map!==sanctumTex)sphereMat.map.dispose();sphereMat.map=t;sphereMat.needsUpdate=true;}
+function clearVideo(){if(state.video){state.video.pause();URL.revokeObjectURL(state.video.src);state.video=null;}$('#playBtn').hidden=true;}
+$('#file').addEventListener('change',e=>{
+  const f=e.target.files&&e.target.files[0];if(!f)return;clearVideo();
+  const url=URL.createObjectURL(f);
+  const done=kind=>{sampleGroup.visible=false;state.mode=kind;lon=0;lat=0;
+    const L=$('#loaded');L.hidden=false;L.textContent='Loaded '+f.name+'. Tap Begin darshan to view it.';$('#bellBtn').hidden=kind==='video';};
+  if(f.type.startsWith('video/')){
+    const v=document.createElement('video');v.src=url;v.loop=true;v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('webkit-playsinline','');v.preload='auto';
+    v.addEventListener('error',()=>notice('That video could not be played on this phone. Try an MP4 (H.264) export.'));
+    state.video=v;const t=new THREE.VideoTexture(v);t.encoding=THREE.sRGBEncoding;t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;
+    setTexture(t);$('#playBtn').hidden=false;done('video');
+  }else{
+    new THREE.TextureLoader().load(url,t=>{t.encoding=THREE.sRGBEncoding;t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;setTexture(t);done('photo');},
+      undefined,()=>notice('That photo could not be opened. Use a JPG or PNG that is twice as wide as it is tall.'));
+  }
+});
+function togglePlay(){const v=state.video;if(!v)return;if(v.paused){v.play().catch(()=>{});}else v.pause();}
+
+/* ---------- UI ---------- */
+let noticeT=0;
+function notice(msg){const n=$('#notice');n.textContent=msg;n.hidden=false;clearTimeout(noticeT);noticeT=setTimeout(()=>n.hidden=true,7000);}
+function setHeadset(on){state.headset=on;$('#hs').checked=on;try{localStorage.setItem('darshan-hs',on?'1':'0');}catch(e){}
+  $('#hsBtn').setAttribute('aria-pressed',String(on));applyChrome();layout();
+  if(on&&state.started){const el=document.documentElement,rf=el.requestFullscreen||el.webkitRequestFullscreen;
+    if(rf){try{const p=rf.call(el);if(p&&p.then)p.then(()=>screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{})).catch(()=>{});}catch(e){}}}
+  if(!on){const ef=document.exitFullscreen||document.webkitExitFullscreen;if((document.fullscreenElement||document.webkitFullscreenElement)&&ef)try{ef.call(document);}catch(e){}}}
+function applyChrome(){
+  const inHs=state.started&&state.headset;
+  $('#bar').hidden=!state.started||inHs;$('#exitHs').hidden=!inHs;$('#divider').hidden=!inHs;ret.visible=inHs;
+}
+$('#hs').addEventListener('change',e=>setHeadset(e.target.checked));
+$('#hsBtn').addEventListener('click',()=>setHeadset(!state.headset));
+$('#exitHs').addEventListener('click',()=>setHeadset(false));
+$('#sep').addEventListener('input',e=>{state.sep=e.target.value/100;$('#sepVal').textContent=e.target.value+'%';try{localStorage.setItem('darshan-sep',String(state.sep));}catch(err){}});
+$('#face').addEventListener('click',faceShrine);
+$('#bellBtn').addEventListener('click',()=>{audio();ringBell();});
+$('#droneBtn').addEventListener('click',toggleDrone);
+$('#playBtn').addEventListener('click',()=>{togglePlay();});
+let wake=null;
+$('#begin').addEventListener('click',()=>{
+  const motionReq=enableMotion();   // must run first, inside the tap, for iPhone
+  audio();
+  state.started=true;$('#landing').hidden=true;applyChrome();
+  lon=0;lat=.04;needRecenter=state.motion;
+  if(state.video)state.video.play().catch(()=>notice('Tap the screen or Play to start the video.'));
+  if(navigator.wakeLock)navigator.wakeLock.request('screen').then(w=>wake=w).catch(()=>{});
+  if(state.headset)setHeadset(true);
+  motionReq.then(()=>setTimeout(()=>{if(!state.motion&&state.started)
+    notice('Head tracking is not reaching this page, so drag to look around. Open the hosted copy in Chrome or Safari for tracking in a headset.');},1500));
+});
+$('#back').addEventListener('click',()=>{state.started=false;setHeadset(false);if(state.video)state.video.pause();
+  if(drone)toggleDrone();if(wake){wake.release().catch(()=>{});wake=null;}$('#landing').hidden=false;applyChrome();});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&state.started&&navigator.wakeLock&&!wake)
+  navigator.wakeLock.request('screen').then(w=>wake=w).catch(()=>{});});
+if(state.video)$('#playBtn').hidden=false;
+setInterval(()=>{if(state.video)$('#playBtn').textContent=state.video.paused?'Play':'Pause';},400);
+
+function layout(){
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,state.headset?1.5:2));
+  renderer.setSize(canvas.clientWidth,canvas.clientHeight,false);
+  $('#turn').hidden=!(state.started&&state.headset&&innerHeight>innerWidth);
+}
+addEventListener('resize',layout);addEventListener('orientationchange',()=>setTimeout(layout,200));layout();
+$('#hsBtn').setAttribute('aria-pressed',String(state.headset));
+
+/* ---------- loop ---------- */
+const fwd=new THREE.Vector3(),gaze={target:null,t:0,done:false};
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let last=performance.now();
+function frame(now){
+  requestAnimationFrame(frame);
+  const dt=Math.min(.1,(now-last)/1000);last=now;const t=now/1000;
+  if(!state.started&&!reduce){lon+=dt*.05;}
+  if(state.motion&&ori&&state.started){
+    deviceQuat(ori,devQ);
+    if(needRecenter){const e=new THREE.Euler().setFromQuaternion(devQ,'YXZ');yawOffset=-e.y;needRecenter=false;}
+    yawQ.setFromAxisAngle(Y,yawOffset);head.quaternion.copy(yawQ).multiply(devQ);
+  }else head.rotation.set(lat,lon,0,'YXZ');
+  // lamps and bell
+  if(sampleGroup.visible){
+    flames.forEach((s,i)=>{const n=Math.sin(t*13+i*1.7)*Math.sin(t*7.3+i*2.9);s.scale.set(.44*(1+.06*n),.86*(1+.14*n),1);});
+    halo.material.opacity=.27+.05*Math.sin(t*1.3);
+    const st=(now-swingStart)/1000;pivot.rotation.z=st<6?.22*Math.exp(-st*.8)*Math.sin(st*5.5):0;
+    pivot.rotation.x=st<6?.06*Math.exp(-st*.8)*Math.sin(st*4.1):0;
+  }
+  // gaze actions in the headset
+  if(ret.visible){
+    fwd.set(0,0,-1).applyQuaternion(head.quaternion);
+    let target=null;if(fwd.y<-.88)target='down';else if(sampleGroup.visible&&fwd.angleTo(bellDir)<.14)target='bell';
+    if(target!==gaze.target){gaze.target=target;gaze.t=0;gaze.done=false;}
+    if(target&&!gaze.done){gaze.t+=dt;if(gaze.t>=1.4){gaze.done=true;target==='bell'?ringBell():faceShrine();}}
+    fillMesh.scale.setScalar(target&&!gaze.done?Math.max(.001,gaze.t/1.4):.001);
+  }
+  const w=canvas.clientWidth,h=canvas.clientHeight;
+  if(state.headset&&state.started){
+    renderer.setScissorTest(false);renderer.setViewport(0,0,w,h);renderer.setClearColor(0x000000,1);renderer.clear();
+    renderer.setScissorTest(true);
+    const sep=w*state.sep,vw=Math.min(sep,w/2),cx=w/2;
+    [[camL,cx-sep/2-vw/2],[camR,cx+sep/2-vw/2]].forEach(([c,x])=>{renderer.setViewport(x,0,vw,h);renderer.setScissor(x,0,vw,h);
+      c.aspect=vw/h;c.updateProjectionMatrix();renderer.render(scene,c);});
+    renderer.setScissorTest(false);
+  }else{
+    renderer.setViewport(0,0,w,h);cam.aspect=w/h;cam.fov=w<h?82:70;cam.updateProjectionMatrix();renderer.render(scene,cam);
+  }
+}
+requestAnimationFrame(frame);
+})();
+</script>
